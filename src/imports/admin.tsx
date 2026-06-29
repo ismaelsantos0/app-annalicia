@@ -1743,8 +1743,40 @@ function BannersPanel({ token }: { token: string }) {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-semibold">URL da Imagem (Recomendado 1200x1500)</label>
-                <input required type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://..." className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary" />
+                <label className="mb-1 block text-sm font-semibold">Imagem do Banner (Recomendado 1200x1500)</label>
+                <div className="flex flex-col gap-3">
+                  {imageUrl && (
+                    <div className="relative h-48 w-full overflow-hidden rounded-xl border border-pink-100">
+                      <img src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
+                      <button 
+                        type="button"
+                        onClick={() => setImageUrl("")}
+                        className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/80 text-red-500 hover:bg-white"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                  {!imageUrl && (
+                    <input 
+                      required
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = (event) => {
+                          if (event.target?.result) {
+                            setImageUrl(event.target.result as string);
+                          }
+                        };
+                      }}
+                      className="w-full rounded-xl border border-pink-100 p-2 text-sm outline-none file:mr-4 file:rounded-full file:border-0 file:bg-pink-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-pink-100" 
+                    />
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
