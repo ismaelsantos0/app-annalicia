@@ -29,12 +29,7 @@ import { fetchProdutos, fetchClientes, fetchPedidosAdmin, updateOrderStatus, log
 import { formatBRL } from "../lib/products";
 import { formatWhatsApp } from "../lib/whatsapp";
 
-export const Route = createFileRoute("/admin")({
-  head: () => ({
-    meta: [{ title: "Painel Admin — Annalicia Modas" }],
-  }),
-  component: AdminDashboard,
-});
+
 
 type Tab = "dashboard" | "catalogo" | "pedidos" | "marketing" | "configuracoes";
 
@@ -110,12 +105,12 @@ export default function AdminDashboard() {
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="border-b border-pink-100 bg-white md:w-64 md:border-b-0 md:border-r">
         <div className="border-b border-pink-100 px-6 py-6">
-          <Link to="/" className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2">
             <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">
               <Sparkles className="h-4 w-4" />
             </span>
             <span className="font-display text-lg text-primary">Annalicia</span>
-          </Link>
+          </a>
           <p className="mt-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Painel Admin
           </p>
@@ -140,13 +135,13 @@ export default function AdminDashboard() {
           })}
         </nav>
         <div className="hidden border-t border-pink-100 p-4 md:block">
-          <Link
-            to="/"
+          <a
+            href="/"
             className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-primary"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Voltar à loja
-          </Link>
+          </a>
           <button 
             onClick={() => { localStorage.removeItem("admin_token"); setToken(null); }}
             className="mt-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-red-400 hover:text-red-500"
