@@ -58,6 +58,11 @@ export const enviarDisparo = (token: string, mensagem: string) => request("/clie
   body: JSON.stringify({ mensagem })
 });
 
+export const inscreverNotificacoes = (nome: string, whatsapp: string) => request("/clientes/inscrever", {
+  method: "POST",
+  body: JSON.stringify({ nome, whatsapp })
+});
+
 export const createProduto = (token: string, data: any) => request("/produtos", {
   method: "POST",
   headers: { Authorization: `Bearer ${token}` },

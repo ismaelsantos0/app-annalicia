@@ -4,6 +4,7 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { CartDrawer } from "../components/CartDrawer";
 import { ProductCard } from "../components/ProductCard";
+import { NotificationBubble } from "./NotificationBubble";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProdutos, fetchCategorias, fetchBanners, fetchConfiguracoes } from "../lib/api";
 import { useState, useEffect } from "react";
@@ -90,6 +91,7 @@ function Storefront() {
       {config && <PromoPopup config={config} />}
       <Navbar />
       <CartDrawer />
+      <NotificationBubble />
 
       {/* Hero */}
       <section className="relative overflow-hidden transition-all duration-700 ease-in-out">
