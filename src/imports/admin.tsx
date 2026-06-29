@@ -1773,3 +1773,4 @@ function ConfiguracoesTabs({ token }: { token: string }) {
     </>
   );
 }
+export default AdminDashboard;
