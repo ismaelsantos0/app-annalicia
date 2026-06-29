@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -1918,10 +1918,14 @@ function DestaquesPanel({ token }: { token: string }) {
     queryFn: fetchProdutos,
   });
 
-  if (config && !isLoadingConfig && !queryClient.isMutating()) {
-    if (config.titulo_destaques && config.titulo_destaques !== titulo) setTitulo(config.titulo_destaques);
-    if (config.categoria_destaque_id !== undefined && config.categoria_destaque_id !== categoriaDestaqueId) setCategoriaDestaqueId(config.categoria_destaque_id || "");
-  }
+  useEffect(() => {
+    if (config && !isLoadingConfig) {
+      if (config.titulo_destaques) setTitulo(config.titulo_destaques);
+      if (config.categoria_destaque_id !== undefined && config.categoria_destaque_id !== null) {
+        setCategoriaDestaqueId(config.categoria_destaque_id);
+      }
+    }
+  }, [config, isLoadingConfig]);
 
   const saveConfigMutation = useMutation({
     mutationFn: () => updateConfiguracoes(token, {
