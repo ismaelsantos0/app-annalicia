@@ -114,7 +114,7 @@ function AdminLogin({ onLogin }: { onLogin: (t: string) => void }) {
       formData.append("username", username);
       formData.append("password", password);
       
-      const res = await api("/auth/login", {
+      const res = await api("/auth/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData,
