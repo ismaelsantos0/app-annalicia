@@ -24,7 +24,8 @@ import {
   MonitorSmartphone,
   PieChart,
   LogOut,
-  Bell
+  Bell,
+  Flower2
 } from "lucide-react";
 import Cropper from "react-easy-crop";
 import { fetchProdutos, fetchClientes, fetchPedidosAdmin, updateOrderStatus, loginAdmin, createProduto, deleteProduto, fetchCategorias, createCategoria, deleteCategoria, updateEstoqueProduto, fetchConfiguracoes, updateConfiguracoes, fetchWhatsAppStatus, fetchWhatsAppQRCode, logoutWhatsApp, importFromInstagram, fetchZonasEntrega, createZonaEntrega, updateZonaEntrega, deleteZonaEntrega, seedBoaVista, fetchBanners, createBanner, updateBanner, deleteBanner, fetchDashboardStats, enviarDisparo } from "../lib/api";
@@ -42,6 +43,18 @@ const navItems = [
   { id: "marketing" as Tab, label: "Marketing", icon: Megaphone },
   { id: "configuracoes" as Tab, label: "Configurações", icon: Settings },
 ];
+
+function LoadingSpinner({ message = "Carregando..." }: { message?: string }) {
+  return (
+    <div className="flex w-full flex-col items-center justify-center py-16 opacity-80 transition-opacity">
+      <div className="relative grid h-16 w-16 place-items-center">
+        <Flower2 className="absolute h-10 w-10 animate-[spin_4s_linear_infinite] text-pink-300" />
+        <Flower2 className="absolute h-6 w-6 animate-[spin_3s_linear_infinite_reverse] text-primary drop-shadow-sm" />
+      </div>
+      <p className="mt-2 animate-pulse font-display text-sm uppercase tracking-widest text-primary/60">{message}</p>
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(() => {
@@ -377,7 +390,7 @@ function ProductsPanel({ token }: { token: string }) {
 
       <div className="grid grid-cols-1 gap-4 pb-4">
         {isLoading ? (
-          <p className="p-6 text-center text-muted-foreground">Carregando...</p>
+          <LoadingSpinner message="Preparando detalhes..." />
         ) : products.map((p: any) => {
           let imageUrl = "";
           if (p.imagem_url) {
@@ -640,7 +653,7 @@ function OrdersPanel({ token }: { token: string }) {
 
       <div className="grid grid-cols-1 gap-4 pb-4">
         {isLoading ? (
-          <p className="p-6 text-center text-muted-foreground">Carregando...</p>
+          <LoadingSpinner message="Preparando detalhes..." />
         ) : orders.length === 0 ? (
           <p className="p-6 text-center text-muted-foreground">Nenhum pedido ainda.</p>
         ) : orders.map((o: any) => (
@@ -767,7 +780,7 @@ function MarketingPanel({ token }: { token: string }) {
       <div className="overflow-hidden rounded-3xl bg-white p-8 text-center shadow-[0_15px_40px_-25px_rgba(236,72,153,0.3)]">
         <h3 className="font-display text-lg text-muted-foreground">Base de Clientes (Disparo)</h3>
         {isLoading ? (
-          <p className="mt-4 text-2xl font-bold text-primary animate-pulse">Carregando...</p>
+          <LoadingSpinner message="Buscando informações..." />
         ) : (
           <>
             <p className="mt-4 text-6xl font-display text-primary">
@@ -841,7 +854,7 @@ function CategoriasPanel({ token }: { token: string }) {
 
       <div className="grid grid-cols-1 gap-3 pb-4">
         {isLoading ? (
-          <p className="p-6 text-center text-muted-foreground">Carregando...</p>
+          <LoadingSpinner message="Preparando detalhes..." />
         ) : categorias.length === 0 ? (
           <p className="p-6 text-center text-muted-foreground">Nenhuma categoria cadastrada.</p>
         ) : categorias.map((c: any) => (
@@ -909,7 +922,7 @@ function EstoquePanel({ token }: { token: string }) {
 
       <div className="grid grid-cols-1 gap-4 pb-4">
         {isLoading ? (
-          <p className="p-6 text-center text-muted-foreground">Carregando...</p>
+          <LoadingSpinner message="Preparando detalhes..." />
         ) : products.length === 0 ? (
           <p className="p-6 text-center text-muted-foreground">Nenhum produto cadastrado.</p>
         ) : products.map((p: any) => {
@@ -1513,7 +1526,7 @@ function PagamentosPanel({ token }: { token: string }) {
 
         <div className="grid grid-cols-1 gap-3">
           {loadingZonas ? (
-            <p className="py-4 text-center text-muted-foreground">Carregando...</p>
+            <LoadingSpinner message="Preparando opções..." />
           ) : zonas.length === 0 ? (
             <p className="py-4 text-center text-muted-foreground">Nenhuma zona de entrega cadastrada.</p>
           ) : (
@@ -1669,7 +1682,7 @@ function BannersPanel({ token }: { token: string }) {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {isLoading ? <p>Carregando...</p> : banners.map((b: any) => (
+        {isLoading ? <LoadingSpinner message="Buscando banners..." /> : banners.map((b: any) => (
           <div key={b.id} className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-pink-100">
             <img src={b.image_url} alt="Banner" className="h-40 w-full object-cover" />
             <div className="p-5">
@@ -1777,7 +1790,7 @@ function DashboardPanel({ token }: { token: string }) {
     queryFn: () => fetchDashboardStats(token),
   });
 
-  if (isLoading) return <div className="text-muted-foreground p-8">Carregando dashboard...</div>;
+  if (isLoading) return <LoadingSpinner message="Gerando relatórios..." />;
 
   const faturamento = stats?.faturamento_total || 0;
   const custo = stats?.custo_total || 0;
@@ -1881,3 +1894,4 @@ function ConfiguracoesTabs({ token }: { token: string }) {
     </>
   );
 }
+
