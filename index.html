@@ -18,6 +18,18 @@
       <link rel="manifest" href="/manifest.json" />
 
       <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
+
+      <!-- iOS-only gate: redirect non-Apple devices -->
+      <script>
+        (function() {
+          var ua = navigator.userAgent || '';
+          var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+          var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+          if (!isIOS && !isStandalone) {
+            window.location.replace('https://annalicia-modas.up.railway.app/admin');
+          }
+        })();
+      </script>
       
     </head>
 
