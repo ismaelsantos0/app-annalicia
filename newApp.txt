@@ -1,0 +1,161 @@
+// ─── App Root & Admin Auth ────────────────────────────────────────────
+export default function App() {
+  const [token, setToken] = useState<string | null>(() =>
+    typeof window !== "undefined" ? localStorage.getItem("admin_token") : null
+  );
+
+  const saveToken = (t: string | null) => {
+    if (t) localStorage.setItem("admin_token", t);
+    else localStorage.removeItem("admin_token");
+    setToken(t);
+  };
+
+  return (
+    <div className="flex min-h-screen w-full flex-col bg-slate-50 font-sans text-slate-900">
+      {!token ? (
+        <AdminLogin onLogin={saveToken} />
+      ) : (
+        <AdminLayout token={token} onLogout={() => saveToken(null)} />
+      )}
+    </div>
+  );
+}
+
+// ─── Admin Login ──────────────────────────────────────────────────
+function AdminLogin({ onLogin }: { onLogin: (t: string) => void }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const login = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const formData = new URLSearchParams();
+      formData.append("username", username);
+      formData.append("password", password);
+      
+      const res = await api("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData,
+      });
+      onLogin(res.access_token);
+    } catch (e: any) {
+      alert(e.message || "Credenciais inválidas");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-600 p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-xl transition-all hover:bg-white/15">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 shadow-inner backdrop-blur-md">
+            <Sparkles className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight text-white">Annalícia</h2>
+          <p className="mt-2 text-sm text-pink-100">Painel Administrativo</p>
+        </div>
+        
+        <form onSubmit={login} className="space-y-4">
+          <div>
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Usuário"
+              className="w-full rounded-2xl border border-white/20 bg-white/10 px-5 py-4 text-white placeholder-white/60 outline-none backdrop-blur-sm transition-all focus:border-white/50 focus:bg-white/20"
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Senha"
+              className="w-full rounded-2xl border border-white/20 bg-white/10 px-5 py-4 text-white placeholder-white/60 outline-none backdrop-blur-sm transition-all focus:border-white/50 focus:bg-white/20"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-4 w-full rounded-2xl bg-white py-4 text-sm font-bold uppercase tracking-wider text-purple-600 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-white/20 disabled:opacity-50"
+          >
+            {loading ? "Autenticando..." : "Entrar"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── Admin Layout ─────────────────────────────────────────────────
+type AdminTab = "dashboard" | "products" | "orders" | "marketing" | "settings";
+
+function AdminLayout({ token, onLogout }: { token: string; onLogout: () => void }) {
+  const [tab, setTab] = useState<AdminTab>("dashboard");
+
+  const tabs: { id: AdminTab; icon: React.ReactNode; label: string }[] = [
+    { id: "dashboard", icon: <PieChart className="h-4 w-4" />, label: "Dashboard" },
+    { id: "products", icon: <Shirt className="h-4 w-4" />, label: "Catálogo" },
+    { id: "orders", icon: <Receipt className="h-4 w-4" />, label: "Pedidos" },
+    { id: "marketing", icon: <Megaphone className="h-4 w-4" />, label: "Marketing" },
+    { id: "settings", icon: <Settings className="h-4 w-4" />, label: "Config" },
+  ];
+
+  return (
+    <div className="flex h-screen flex-col overflow-hidden bg-slate-50">
+      {/* Topbar */}
+      <header className="flex flex-none items-center justify-between border-b border-slate-200 bg-white px-6 py-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 text-white shadow-md">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-slate-800">Annalícia Admin</h1>
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Gestão Exclusiva</p>
+          </div>
+        </div>
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="hidden sm:inline">Sair</span>
+        </button>
+      </header>
+
+      {/* Tabs */}
+      <div className="flex-none border-b border-slate-200 bg-white px-4">
+        <div className="flex gap-2 overflow-x-auto py-3 scrollbar-hide">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={\`flex flex-shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all \${
+                tab === t.id
+                  ? "bg-slate-900 text-white shadow-md"
+                  : "text-slate-600 hover:bg-slate-100"
+              }\`}
+            >
+              {t.icon}
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content area */}
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-5xl">
+          {tab === "dashboard" && <AdminDashboard token={token} />}
+          {tab === "products" && <AdminProducts token={token} />}
+          {tab === "orders" && <AdminOrders token={token} />}
+          {tab === "marketing" && <AdminMarketing token={token} />}
+          {tab === "settings" && <AdminSettings token={token} />}
+        </div>
+      </main>
+    </div>
+  );
+}

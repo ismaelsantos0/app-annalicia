@@ -1,0 +1,29 @@
+function Field({ label, icon, value, onChange, placeholder, error, inputMode, readonly }: {
+  label: string;
+  icon: React.ReactNode;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  error?: boolean;
+  inputMode?: "text" | "tel" | "email" | "numeric" | "decimal" | "search" | "url";
+  readonly?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {icon} {label}
+      </span>
+      <input
+        type="text"
+        inputMode={inputMode}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        readOnly={readonly}
+        className={`w-full rounded-full border bg-white px-4 py-2.5 text-sm outline-none transition-colors ${
+          error ? "border-red-500 focus:border-red-500" : "border-border focus:border-primary"
+        } ${readonly ? "opacity-50" : ""}`}
+      />
+    </label>
+  );
+}

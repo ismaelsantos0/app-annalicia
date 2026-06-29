@@ -46,7 +46,7 @@ const navItems = [
   { id: "configuracoes" as Tab, label: "Configurações", icon: Settings },
 ];
 
-function AdminDashboard() {
+export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("admin_token");
