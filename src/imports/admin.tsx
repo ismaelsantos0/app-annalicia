@@ -292,10 +292,18 @@ function ProductsPanel({ token }: { token: string }) {
         {isLoading ? (
           <p className="p-6 text-center text-muted-foreground">Carregando...</p>
         ) : products.map((p: any) => {
-          const parsedImagens = typeof p.imagens === 'string' ? JSON.parse(p.imagens) : (p.imagens || []);
+          let imageUrl = "";
+          if (p.imagem_url) {
+            try {
+              const parsed = JSON.parse(p.imagem_url);
+              imageUrl = Array.isArray(parsed) ? parsed[0] : parsed;
+            } catch {
+              imageUrl = p.imagem_url;
+            }
+          }
           return (
           <div key={p.id} className="flex overflow-hidden rounded-2xl bg-white p-3 shadow-sm border border-pink-50 relative">
-            <img src={parsedImagens?.[0] || ""} alt={p.nome} className="h-24 w-20 flex-shrink-0 rounded-xl object-cover bg-pink-50" />
+            <img src={imageUrl || ""} alt={p.nome} className="h-24 w-20 flex-shrink-0 rounded-xl object-cover bg-pink-50" />
             <div className="ml-4 flex flex-1 flex-col justify-center">
               <span className="mb-1 inline-flex w-fit items-center rounded-full bg-pink-100/50 px-2 py-0.5 text-[10px] font-semibold text-primary">
                 {p.categoria?.nome || p.categoria || ""}
@@ -818,7 +826,15 @@ function EstoquePanel({ token }: { token: string }) {
         ) : products.length === 0 ? (
           <p className="p-6 text-center text-muted-foreground">Nenhum produto cadastrado.</p>
         ) : products.map((p: any) => {
-          const parsedImagens = typeof p.imagens === 'string' ? JSON.parse(p.imagens) : (p.imagens || []);
+          let imageUrl = "";
+          if (p.imagem_url) {
+            try {
+              const parsed = JSON.parse(p.imagem_url);
+              imageUrl = Array.isArray(parsed) ? parsed[0] : parsed;
+            } catch {
+              imageUrl = p.imagem_url;
+            }
+          }
           let badgeClass = "bg-mint text-emerald-700";
           let statusText = "Seguro";
           
@@ -833,7 +849,7 @@ function EstoquePanel({ token }: { token: string }) {
           return (
             <div key={p.id} className="flex flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-sm border border-pink-50">
               <div className="flex items-center gap-3">
-                <img src={parsedImagens?.[0] || ""} alt={p.nome} className="h-14 w-12 rounded-xl object-cover bg-pink-50 flex-shrink-0" />
+                <img src={imageUrl || ""} alt={p.nome} className="h-14 w-12 rounded-xl object-cover bg-pink-50 flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="font-display text-sm leading-tight">{p.nome}</h3>
                   <div className="mt-1 flex items-center gap-2">
