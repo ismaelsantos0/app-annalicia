@@ -294,6 +294,13 @@ function AdminDashboard({ token }: { token: string }) {
 function AdminProducts({ token }: { token: string }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
+  
+  const [nome, setNome] = useState("");
+  const [preco, setPreco] = useState("");
+  const [estoque, setEstoque] = useState("");
+  const [imagemUrl, setImagemUrl] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -310,37 +317,101 @@ function AdminProducts({ token }: { token: string }) {
     } catch (e: any) { alert(e.message); }
   };
 
+  const add = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api("/produtos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          nome,
+          preco: parseFloat(preco.replace(",", ".")) || 0,
+          estoque: parseInt(estoque) || 0,
+          imagem_url: imagemUrl,
+          is_active: true
+        })
+      });
+      setIsAdding(false);
+      setNome("");
+      setPreco("");
+      setEstoque("");
+      setImagemUrl("");
+      load();
+    } catch (e: any) { alert(e.message); }
+    finally { setSaving(false); }
+  };
+
   if (loading) return <LoadingPulse />;
 
   return (
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h2 style={{ fontFamily: "Quicksand, sans-serif" }} className="text-lg font-bold">Catálogo</h2>
-        <span className="text-xs text-muted-foreground">{products.length} produtos</span>
+        <div>
+          <h2 style={{ fontFamily: "Quicksand, sans-serif" }} className="text-lg font-bold">Catálogo</h2>
+          <span className="text-xs text-muted-foreground">{products.length} produtos</span>
+        </div>
+        <button 
+          onClick={() => setIsAdding(true)} 
+          className="flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-slate-800 shadow-md"
+        >
+          <Plus className="h-3.5 w-3.5" /> Novo
+        </button>
       </div>
+
+      {isAdding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[2rem] bg-white p-6 shadow-2xl animate-in zoom-in-95 fade-in">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold">Novo Produto</h3>
+              <button onClick={() => setIsAdding(false)} className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={add} className="space-y-4">
+              <Field label="Nome do Produto" icon={null} value={nome} onChange={setNome} placeholder="Ex: Vestido Floral" />
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Preço (R$)" icon={null} value={preco} onChange={setPreco} placeholder="Ex: 89,90" inputMode="decimal" />
+                <Field label="Estoque" icon={null} value={estoque} onChange={setEstoque} placeholder="Ex: 10" inputMode="numeric" />
+              </div>
+              <Field label="URL da Imagem" icon={null} value={imagemUrl} onChange={setImagemUrl} placeholder="https://..." />
+              
+              <button type="submit" disabled={saving || !nome} className="mt-6 w-full rounded-full bg-primary py-3.5 font-bold text-white disabled:opacity-50 transition-all hover:shadow-lg hover:shadow-pink-500/30">
+                {saving ? "Salvando..." : "Salvar Produto"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-2">
         {products.map(p => (
-          <div key={p.id} className="flex items-center gap-3 rounded-xl border border-pink-50 bg-white p-3 shadow-sm">
+          <div key={p.id} className="flex items-center gap-3 rounded-xl border border-pink-50 bg-white p-3 shadow-sm transition-all hover:border-pink-200">
             <div className="h-12 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-pink-50">
               <img src={p.images[0] || ""} alt={p.name} className="h-full w-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-semibold">{p.name}</p>
+              <p className="truncate text-sm font-semibold text-slate-800">{p.name}</p>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-primary">{R(p.price)}</span>
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                   p.stock === 0 ? "bg-red-100 text-red-600" :
                   p.stock <= 3 ? "bg-yellow-100 text-yellow-700" :
-                  "bg-mint text-emerald-700"
+                  "bg-green-100 text-green-700"
                 }`}>{p.stock} un.</span>
               </div>
             </div>
-            <button onClick={() => del(p.id, p.name)} className="text-muted-foreground transition-colors hover:text-red-500">
+            <button onClick={() => del(p.id, p.name)} className="rounded-full p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500">
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
         ))}
-        {products.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">Nenhum produto cadastrado.</p>}
+        {products.length === 0 && (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 py-12">
+            <Shirt className="mb-2 h-8 w-8 text-slate-300" />
+            <p className="text-sm font-medium text-slate-500">Nenhum produto cadastrado</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -603,4 +674,36 @@ function LoadingPulse() {
     </div>
   );
 }
+
+
+function Field({ label, icon, value, onChange, placeholder, error, inputMode, readonly }: {
+  label: string;
+  icon: React.ReactNode;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  error?: boolean;
+  inputMode?: "text" | "tel" | "email" | "numeric" | "decimal" | "search" | "url";
+  readonly?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {icon} {label}
+      </span>
+      <input
+        type="text"
+        inputMode={inputMode}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        readOnly={readonly}
+        className={`w-full rounded-full border bg-white px-4 py-2.5 text-sm outline-none transition-colors ${
+          error ? "border-red-500 focus:border-red-500" : "border-border focus:border-primary"
+        } ${readonly ? "opacity-50" : ""}`}
+      />
+    </label>
+  );
+}
+
 
