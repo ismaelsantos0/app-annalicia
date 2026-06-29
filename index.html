@@ -1,13 +1,22 @@
 
   <!DOCTYPE html>
-  <html lang="en">
+  <html lang="pt-BR">
     <head>
       
       <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Criar app mobile</title>
-      <meta name="description" content="This web application offers users a seamless platform for managing and interacting with content, enhancing user engagement and accessibility." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+      <title>Annalicia Admin</title>
+      <meta name="description" content="Painel administrativo da loja Annalicia - Gerencie produtos, pedidos e marketing." />
       <meta name="robots" content="noindex, nofollow" />
+
+      <!-- PWA Meta Tags -->
+      <meta name="theme-color" content="#ec4899" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      <meta name="apple-mobile-web-app-title" content="Annalicia" />
+      <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+      <link rel="manifest" href="/manifest.json" />
+
       <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
       
     </head>
@@ -16,6 +25,15 @@
       
       <div id="root"></div>
       <script type="module" src="/src/main.tsx"></script>
+
+      <!-- Service Worker Registration -->
+      <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+          });
+        }
+      </script>
       
     </body>
   </html>
