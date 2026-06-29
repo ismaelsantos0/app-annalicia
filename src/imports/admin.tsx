@@ -1168,36 +1168,26 @@ function ConfiguracoesPanel({ token }: { token: string }) {
 
             <div className="pt-8 border-t border-pink-50">
               <h3 className="mb-4 text-lg font-display text-pink-900 flex items-center justify-between">
-                Popup Promocional
-                <label className="flex items-center gap-2 cursor-pointer">
+                Bolha de Inscrição (Captura de Leads)
+                <label className="flex items-center gap-2 cursor-pointer text-primary">
                   <input type="checkbox" checked={popupAtivo} onChange={e => setPopupAtivo(e.target.checked)} className="h-5 w-5 accent-primary" />
-                  <span className="text-sm font-medium">Ativar Popup</span>
+                  <span className="text-sm font-medium">Ativar Bolha</span>
                 </label>
               </h3>
               
               {popupAtivo && (
                 <div className="space-y-4">
                   <div>
-                    <label className="mb-1 block text-sm font-semibold">Título do Popup</label>
-                    <input type="text" value={popupTitulo} onChange={e => setPopupTitulo(e.target.value)} placeholder="Ex: Ganhe 10% OFF!" className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary" />
+                    <label className="mb-1 block text-sm font-semibold">Título da Janela</label>
+                    <input type="text" value={popupTitulo} onChange={e => setPopupTitulo(e.target.value)} placeholder="Ex: Receba Ofertas Exclusivas!" className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary" />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-semibold">Texto do Popup</label>
-                    <textarea value={popupTexto} onChange={e => setPopupTexto(e.target.value)} rows={3} placeholder="Insira seu e-mail para receber o cupom..." className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary resize-none" />
+                    <label className="mb-1 block text-sm font-semibold">Mensagem</label>
+                    <textarea value={popupTexto} onChange={e => setPopupTexto(e.target.value)} rows={3} placeholder="Insira seu número de WhatsApp para ser notificado de novidades..." className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary resize-none" />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-semibold">URL da Imagem (Opcional)</label>
-                    <input type="url" value={popupImagem} onChange={e => setPopupImagem(e.target.value)} placeholder="https://..." className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="mb-1 block text-sm font-semibold">Texto do Botão</label>
-                      <input type="text" value={popupBotaoTexto} onChange={e => setPopupBotaoTexto(e.target.value)} placeholder="Pegar Cupom" className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary" />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm font-semibold">Link do Botão</label>
-                      <input type="text" value={popupBotaoLink} onChange={e => setPopupBotaoLink(e.target.value)} placeholder="/colecao-nova" className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary" />
-                    </div>
+                    <label className="mb-1 block text-sm font-semibold">Texto do Botão (Opcional)</label>
+                    <input type="text" value={popupBotaoTexto} onChange={e => setPopupBotaoTexto(e.target.value)} placeholder="Me avisar" className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary" />
                   </div>
                 </div>
               )}
