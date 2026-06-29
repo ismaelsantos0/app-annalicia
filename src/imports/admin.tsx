@@ -22,7 +22,8 @@ import {
   Image as ImageIcon,
   MousePointerClick,
   MonitorSmartphone,
-  PieChart
+  PieChart,
+  LogOut
 } from "lucide-react";
 import Cropper from "react-easy-crop";
 import { fetchProdutos, fetchClientes, fetchPedidosAdmin, updateOrderStatus, loginAdmin, createProduto, deleteProduto, fetchCategorias, createCategoria, deleteCategoria, updateEstoqueProduto, fetchConfiguracoes, updateConfiguracoes, fetchWhatsAppStatus, fetchWhatsAppQRCode, logoutWhatsApp, importFromInstagram, fetchZonasEntrega, createZonaEntrega, updateZonaEntrega, deleteZonaEntrega, seedBoaVista, fetchBanners, createBanner, updateBanner, deleteBanner, fetchDashboardStats, enviarDisparo } from "../lib/api";
@@ -102,56 +103,25 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="border-b border-pink-100 bg-white md:w-64 md:border-b-0 md:border-r">
-        <div className="border-b border-pink-100 px-6 py-6">
-          <a href="/" className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">
-              <Sparkles className="h-4 w-4" />
-            </span>
-            <span className="font-display text-lg text-primary">Annalicia</span>
-          </a>
-          <p className="mt-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Painel Admin
-          </p>
+    <div className="flex h-[100dvh] flex-col bg-slate-50">
+      {/* Top App Bar */}
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-pink-100 bg-white px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground">
+            <Sparkles className="h-4 w-4" />
+          </span>
+          <span className="font-display text-lg text-primary">Annalicia Admin</span>
         </div>
-        <nav className="flex gap-2 overflow-x-auto p-4 md:flex-col">
-          {navItems.map(({ id, label, icon: Icon }) => {
-            const active = tab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`flex items-center gap-3 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium transition ${
-                  active
-                    ? "bg-primary text-primary-foreground shadow-[0_8px_20px_-10px_rgba(236,72,153,0.55)]"
-                    : "text-foreground/70 hover:bg-pink-50 hover:text-primary"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            );
-          })}
-        </nav>
-        <div className="hidden border-t border-pink-100 p-4 md:block">
-          <a
-            href="/"
-            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-primary"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Voltar à loja
-          </a>
-          <button 
-            onClick={() => { localStorage.removeItem("admin_token"); setToken(null); }}
-            className="mt-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-red-400 hover:text-red-500"
-          >
-            Sair
-          </button>
-        </div>
-      </aside>
+        <button 
+          onClick={() => { localStorage.removeItem("admin_token"); setToken(null); }}
+          className="grid h-8 w-8 place-items-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
+      </header>
 
-      <main className="flex-1 px-4 py-8 sm:px-8">
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto px-4 py-6 pb-24">
         {tab === "dashboard" ? (
           <DashboardPanel token={token} />
         ) : tab === "pedidos" ? (
@@ -164,6 +134,27 @@ export default function AdminDashboard() {
           <CatalogoTabs token={token} />
         )}
       </main>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-pink-100 bg-white px-2 py-2 pb-safe shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+        {navItems.map(({ id, label, icon: Icon }) => {
+          const active = tab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-1 transition-all ${
+                active ? "text-primary" : "text-muted-foreground hover:text-primary/70"
+              }`}
+            >
+              <div className={`relative grid h-8 w-8 place-items-center rounded-full transition-all ${active ? "bg-pink-100" : "bg-transparent"}`}>
+                <Icon className={`h-5 w-5 ${active ? "scale-110" : ""}`} />
+              </div>
+              <span className="text-[10px] font-semibold">{label}</span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
@@ -297,69 +288,48 @@ function ProductsPanel({ token }: { token: string }) {
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-3xl bg-white shadow-[0_15px_40px_-25px_rgba(236,72,153,0.3)]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-pink-50/50 text-left text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-6 py-3 font-semibold">Foto</th>
-                <th className="px-6 py-3 font-semibold">Nome</th>
-                <th className="px-6 py-3 font-semibold">Preço</th>
-                <th className="px-6 py-3 font-semibold">Categoria</th>
-                <th className="px-6 py-3 font-semibold">Estoque</th>
-                <th className="px-6 py-3 font-semibold"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">Carregando...</td></tr>
-              ) : products.map((p: any) => (
-                <tr key={p.id} className="border-t border-pink-50 hover:bg-pink-50/40">
-                  <td className="px-6 py-4">
-                    <img src={p.images?.[0] || ""} alt={p.name} className="h-14 w-12 rounded-xl object-cover bg-pink-50" />
-                  </td>
-                  <td className="px-6 py-4 font-display text-base">{p.name}</td>
-                  <td className="px-6 py-4 font-semibold text-primary">{formatBRL(p.price)}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center rounded-full bg-pink-100/50 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                      {p.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${p.stock < 10 ? "bg-pink-100 text-primary" : "bg-mint text-emerald-700"}`}>
-                      {p.stock} un.
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => {
-                        if (confirm(`Deletar o produto ${p.name}?`)) {
-                          deleteProdMutation.mutate(p.id);
-                        }
-                      }}
-                      className="text-muted-foreground hover:text-red-500 transition"
-                      title="Deletar"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="grid grid-cols-1 gap-4 pb-4">
+        {isLoading ? (
+          <p className="p-6 text-center text-muted-foreground">Carregando...</p>
+        ) : products.map((p: any) => (
+          <div key={p.id} className="flex overflow-hidden rounded-2xl bg-white p-3 shadow-sm border border-pink-50 relative">
+            <img src={p.images?.[0] || ""} alt={p.name} className="h-24 w-20 flex-shrink-0 rounded-xl object-cover bg-pink-50" />
+            <div className="ml-4 flex flex-1 flex-col justify-center">
+              <span className="mb-1 inline-flex w-fit items-center rounded-full bg-pink-100/50 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                {p.category}
+              </span>
+              <h3 className="font-display text-base leading-tight">{p.name}</h3>
+              <div className="mt-2 flex items-end justify-between">
+                <span className="font-semibold text-primary">{formatBRL(p.price)}</span>
+                <span className={`text-xs font-semibold ${p.stock < 10 ? "text-red-500" : "text-emerald-600"}`}>
+                  {p.stock} un.
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                if (confirm(`Deletar o produto ${p.name}?`)) {
+                  deleteProdMutation.mutate(p.id);
+                }
+              }}
+              className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-red-50 text-red-400 hover:text-red-500 transition"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-display text-xl text-primary">Nova Peça ✨</h2>
-              <button onClick={() => setModalOpen(false)} className="rounded-full bg-pink-50 p-2 text-primary hover:bg-pink-100">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <form onSubmit={e => { e.preventDefault(); mutation.mutate(); }} className="space-y-4">
+        <div className="fixed inset-0 z-[60] flex flex-col bg-white">
+          <div className="flex items-center justify-between border-b border-pink-100 bg-white px-4 py-4 shadow-sm">
+            <h2 className="font-display text-xl text-primary">Nova Peça ✨</h2>
+            <button onClick={() => setModalOpen(false)} className="rounded-full bg-pink-50 p-2 text-primary hover:bg-pink-100">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 pb-24">
+            <form onSubmit={e => { e.preventDefault(); mutation.mutate(); }} className="space-y-5">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground/80">Nome da Peça</label>
                 <input required value={nome} onChange={e => setNome(e.target.value)} placeholder="Ex: Cropped Rosa" className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary" />
@@ -570,59 +540,49 @@ function OrdersPanel({ token }: { token: string }) {
         <h1 className="mt-1 font-display text-3xl sm:text-4xl">Pedidos</h1>
       </div>
 
-      <div className="overflow-hidden rounded-3xl bg-white shadow-[0_15px_40px_-25px_rgba(236,72,153,0.3)]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-pink-50/50 text-left text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-6 py-3">Pedido ID</th>
-                <th className="px-6 py-3">Cliente</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Total</th>
-                <th className="px-6 py-3">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Carregando...</td></tr>
-              ) : orders.length === 0 ? (
-                <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Nenhum pedido ainda.</td></tr>
-              ) : orders.map((o: any) => (
-                <tr key={o.id} className="border-t border-pink-50 hover:bg-pink-50/40">
-                  <td className="px-6 py-4 font-mono text-xs">#{o.numero ? String(o.numero).padStart(4, '0') : o.id.split('-')[0]}</td>
-                  <td className="px-6 py-4 font-display">{o.cliente?.nome}<br/><span className="text-xs text-muted-foreground">{o.cliente?.whatsapp}</span></td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold
-                      ${o.status === 'pendente' ? 'bg-yellow-100 text-yellow-700' :
-                        o.status === 'confirmado' ? 'bg-blue-100 text-blue-700' :
-                        o.status === 'enviado' ? 'bg-purple-100 text-purple-700' :
-                        o.status === 'entregue' ? 'bg-green-100 text-green-700' :
-                        'bg-red-100 text-red-700'}`}>
-                      {o.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-semibold text-primary">{formatBRL(o.total)}</td>
-                  <td className="px-6 py-4">
-                    {o.status !== 'cancelado' && o.status !== 'entregue' && (
-                      <div className="flex flex-wrap items-center gap-2">
-                        {o.status === 'pendente' && (
-                          <button onClick={() => handleStatusChange(o.id, o.status, 'confirmado')} className="rounded-lg bg-blue-100 px-3 py-1 text-[10px] font-bold text-blue-700 transition hover:bg-blue-200">Confirmar</button>
-                        )}
-                        {o.status === 'confirmado' && (
-                          <button onClick={() => handleStatusChange(o.id, o.status, 'enviado')} className="rounded-lg bg-purple-100 px-3 py-1 text-[10px] font-bold text-purple-700 transition hover:bg-purple-200">Marcar Enviado</button>
-                        )}
-                        {o.status === 'enviado' && (
-                          <button onClick={() => handleStatusChange(o.id, o.status, 'entregue')} className="rounded-lg bg-green-100 px-3 py-1 text-[10px] font-bold text-green-700 transition hover:bg-green-200">Marcar Entregue</button>
-                        )}
-                        <button onClick={() => handleStatusChange(o.id, o.status, 'cancelado')} className="rounded-lg bg-red-50 px-3 py-1 text-[10px] font-bold text-red-600 transition hover:bg-red-100">Cancelar</button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="grid grid-cols-1 gap-4 pb-4">
+        {isLoading ? (
+          <p className="p-6 text-center text-muted-foreground">Carregando...</p>
+        ) : orders.length === 0 ? (
+          <p className="p-6 text-center text-muted-foreground">Nenhum pedido ainda.</p>
+        ) : orders.map((o: any) => (
+          <div key={o.id} className="flex flex-col overflow-hidden rounded-2xl bg-white p-4 shadow-sm border border-pink-50">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <span className="text-xs font-mono text-muted-foreground">#{o.numero ? String(o.numero).padStart(4, '0') : o.id.split('-')[0]}</span>
+                <h3 className="font-display text-base text-primary leading-tight mt-1">{o.cliente?.nome}</h3>
+                <span className="text-[11px] text-muted-foreground">{o.cliente?.whatsapp}</span>
+              </div>
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider
+                ${o.status === 'pendente' ? 'bg-yellow-100 text-yellow-700' :
+                  o.status === 'confirmado' ? 'bg-blue-100 text-blue-700' :
+                  o.status === 'enviado' ? 'bg-purple-100 text-purple-700' :
+                  o.status === 'entregue' ? 'bg-green-100 text-green-700' :
+                  'bg-red-100 text-red-700'}`}>
+                {o.status}
+              </span>
+            </div>
+            <div className="flex items-center justify-between border-t border-pink-50 pt-3">
+              <span className="font-semibold text-primary">{formatBRL(o.total)}</span>
+              {o.status !== 'cancelado' && o.status !== 'entregue' && (
+                <div className="flex gap-2">
+                  <button onClick={() => handleStatusChange(o.id, o.status, 'cancelado')} className="grid place-items-center rounded-xl bg-red-50 p-2 text-xs font-bold text-red-600 transition hover:bg-red-100">
+                    <X className="h-4 w-4" />
+                  </button>
+                  {o.status === 'pendente' && (
+                    <button onClick={() => handleStatusChange(o.id, o.status, 'confirmado')} className="rounded-xl bg-blue-100 px-3 py-1.5 text-xs font-bold text-blue-700 transition hover:bg-blue-200">Confirmar</button>
+                  )}
+                  {o.status === 'confirmado' && (
+                    <button onClick={() => handleStatusChange(o.id, o.status, 'enviado')} className="rounded-xl bg-purple-100 px-3 py-1.5 text-xs font-bold text-purple-700 transition hover:bg-purple-200">Enviar</button>
+                  )}
+                  {o.status === 'enviado' && (
+                    <button onClick={() => handleStatusChange(o.id, o.status, 'entregue')} className="rounded-xl bg-green-100 px-3 py-1.5 text-xs font-bold text-green-700 transition hover:bg-green-200">Entregue</button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </>
   );
@@ -781,41 +741,27 @@ function CategoriasPanel({ token }: { token: string }) {
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-3xl bg-white shadow-[0_15px_40px_-25px_rgba(236,72,153,0.3)]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-pink-50/50 text-left text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-6 py-3 font-semibold">Nome</th>
-                <th className="px-6 py-3 font-semibold"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={2} className="p-6 text-center text-muted-foreground">Carregando...</td></tr>
-              ) : categorias.length === 0 ? (
-                <tr><td colSpan={2} className="p-6 text-center text-muted-foreground">Nenhuma categoria cadastrada.</td></tr>
-              ) : categorias.map((c: any) => (
-                <tr key={c.id} className="border-t border-pink-50 hover:bg-pink-50/40">
-                  <td className="px-6 py-4 font-display text-base">{c.nome}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => {
-                        if (confirm(`Deletar a categoria ${c.nome}?`)) {
-                          deleteMutation.mutate(c.id);
-                        }
-                      }}
-                      className="text-muted-foreground hover:text-red-500 transition"
-                      title="Deletar"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="grid grid-cols-1 gap-3 pb-4">
+        {isLoading ? (
+          <p className="p-6 text-center text-muted-foreground">Carregando...</p>
+        ) : categorias.length === 0 ? (
+          <p className="p-6 text-center text-muted-foreground">Nenhuma categoria cadastrada.</p>
+        ) : categorias.map((c: any) => (
+          <div key={c.id} className="flex items-center justify-between overflow-hidden rounded-2xl bg-white p-4 shadow-sm border border-pink-50">
+            <span className="font-display text-base text-primary">{c.nome}</span>
+            <button
+              onClick={() => {
+                if (confirm(`Deletar a categoria ${c.nome}?`)) {
+                  deleteMutation.mutate(c.id);
+                }
+              }}
+              className="grid h-8 w-8 place-items-center rounded-full bg-red-50 text-red-400 hover:text-red-500 transition"
+              title="Deletar"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
       </div>
     </>
   );
@@ -863,83 +809,69 @@ function EstoquePanel({ token }: { token: string }) {
         <h1 className="mt-1 font-display text-3xl sm:text-4xl">Controle de Estoque</h1>
       </div>
 
-      <div className="overflow-hidden rounded-3xl bg-white shadow-[0_15px_40px_-25px_rgba(236,72,153,0.3)]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-pink-50/50 text-left text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-6 py-3 font-semibold">Foto</th>
-                <th className="px-6 py-3 font-semibold">Produto</th>
-                <th className="px-6 py-3 font-semibold">Qtd. Atual</th>
-                <th className="px-6 py-3 font-semibold">Status</th>
-                <th className="px-6 py-3 font-semibold text-center">Ajuste Rápido</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Carregando...</td></tr>
-              ) : products.length === 0 ? (
-                <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Nenhum produto cadastrado.</td></tr>
-              ) : products.map((p: any) => {
-                let badgeClass = "bg-mint text-emerald-700";
-                let statusText = "Seguro";
-                
-                if (p.stock <= critico) {
-                  badgeClass = "bg-red-100 text-red-700";
-                  statusText = "Crítico";
-                } else if (p.stock <= atencao) {
-                  badgeClass = "bg-yellow-100 text-yellow-700";
-                  statusText = "Atenção";
-                }
+      <div className="grid grid-cols-1 gap-4 pb-4">
+        {isLoading ? (
+          <p className="p-6 text-center text-muted-foreground">Carregando...</p>
+        ) : products.length === 0 ? (
+          <p className="p-6 text-center text-muted-foreground">Nenhum produto cadastrado.</p>
+        ) : products.map((p: any) => {
+          let badgeClass = "bg-mint text-emerald-700";
+          let statusText = "Seguro";
+          
+          if (p.stock <= critico) {
+            badgeClass = "bg-red-100 text-red-700";
+            statusText = "Crítico";
+          } else if (p.stock <= atencao) {
+            badgeClass = "bg-yellow-100 text-yellow-700";
+            statusText = "Atenção";
+          }
 
-                return (
-                  <tr key={p.id} className="border-t border-pink-50 hover:bg-pink-50/40">
-                    <td className="px-6 py-4">
-                      <img src={p.images?.[0] || ""} alt={p.name} className="h-10 w-8 rounded-lg object-cover bg-pink-50" />
-                    </td>
-                    <td className="px-6 py-4 font-display text-base">{p.name}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${badgeClass}`}>
-                        {p.stock} un.
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`text-xs font-bold uppercase tracking-wider ${badgeClass.replace('bg-', 'text-').replace('text-', '')}`}>
-                        {statusText}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button 
-                          onClick={() => handleUpdate(p.id, p.stock, -1)}
-                          disabled={mutation.isPending || p.stock === 0}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-50 text-primary transition hover:bg-pink-100 disabled:opacity-50"
-                        >
-                          -1
-                        </button>
-                        <input
-                          type="number"
-                          defaultValue={p.stock}
-                          key={p.stock} // força re-render quando o estoque muda
-                          onBlur={(e) => handleDirectUpdate(p.id, e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleDirectUpdate(p.id, (e.target as HTMLInputElement).value)}
-                          className="w-16 rounded-xl border border-pink-100 bg-transparent p-1.5 text-center text-sm outline-none focus:border-primary"
-                        />
-                        <button 
-                          onClick={() => handleUpdate(p.id, p.stock, 1)}
-                          disabled={mutation.isPending}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-50 text-primary transition hover:bg-pink-100 disabled:opacity-50"
-                        >
-                          +1
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+          return (
+            <div key={p.id} className="flex flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-sm border border-pink-50">
+              <div className="flex items-center gap-3">
+                <img src={p.images?.[0] || ""} alt={p.name} className="h-14 w-12 rounded-xl object-cover bg-pink-50 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-display text-sm leading-tight">{p.name}</h3>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClass}`}>
+                      {p.stock} un.
+                    </span>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${badgeClass.replace('bg-', 'text-').replace('text-', '')}`}>
+                      {statusText}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 flex items-center justify-between border-t border-pink-50 pt-3">
+                <span className="text-xs font-semibold text-muted-foreground">Ajuste Rápido:</span>
+                <div className="flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => handleUpdate(p.id, p.stock, -1)}
+                    disabled={mutation.isPending || p.stock === 0}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-50 text-primary transition hover:bg-pink-100 disabled:opacity-50"
+                  >
+                    -1
+                  </button>
+                  <input
+                    type="number"
+                    defaultValue={p.stock}
+                    key={p.stock}
+                    onBlur={(e) => handleDirectUpdate(p.id, e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleDirectUpdate(p.id, (e.target as HTMLInputElement).value)}
+                    className="w-14 rounded-xl border border-pink-100 bg-transparent p-1 text-center text-sm outline-none focus:border-primary"
+                  />
+                  <button 
+                    onClick={() => handleUpdate(p.id, p.stock, 1)}
+                    disabled={mutation.isPending}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-50 text-primary transition hover:bg-pink-100 disabled:opacity-50"
+                  >
+                    +1
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );
@@ -1472,72 +1404,60 @@ function PagamentosPanel({ token }: { token: string }) {
           </button>
         </form>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-pink-100 text-muted-foreground">
-                <th className="pb-3 font-medium">Bairro</th>
-                <th className="pb-3 font-medium">Taxa de Entrega</th>
-                <th className="pb-3 font-medium text-center">Status</th>
-                <th className="pb-3 font-medium text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loadingZonas ? (
-                <tr><td colSpan={4} className="py-4 text-center text-muted-foreground">Carregando...</td></tr>
-              ) : zonas.length === 0 ? (
-                <tr><td colSpan={4} className="py-4 text-center text-muted-foreground">Nenhuma zona de entrega cadastrada.</td></tr>
-              ) : (
-                zonas.map((z: any) => (
-                  <tr key={z.id} className="border-b border-pink-50 last:border-0 group">
-                    <td className="py-3 font-medium text-foreground/80">{z.bairro}</td>
-                    <td className="py-3">
-                      <div className="flex items-center gap-2">
-                        <button 
-                          onClick={() => updateZonaMutation.mutate({ id: z.id, taxa: Math.max(0, z.taxa - 1) })}
-                          className="grid h-6 w-6 place-items-center rounded-full bg-pink-100 text-pink-600 hover:bg-pink-200 transition"
-                          title="Diminuir R$ 1,00"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="w-16 text-center font-medium">{formatBRL(z.taxa)}</span>
-                        <button 
-                          onClick={() => updateZonaMutation.mutate({ id: z.id, taxa: z.taxa + 1 })}
-                          className="grid h-6 w-6 place-items-center rounded-full bg-pink-100 text-pink-600 hover:bg-pink-200 transition"
-                          title="Aumentar R$ 1,00"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </td>
-                    <td className="py-3 text-center">
-                      <button 
-                        onClick={() => updateZonaMutation.mutate({ id: z.id, ativo: !z.ativo })}
-                        className={`text-xs px-2 py-1 rounded-full font-medium ${z.ativo ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
-                      >
-                        {z.ativo ? "Ativo" : "Inativo"}
-                      </button>
-                    </td>
-                    <td className="py-3 text-right">
-                      <button
-                        onClick={() => {
-                          if (confirm(`Remover taxa do bairro ${z.bairro}?`)) {
-                            deleteZonaMutation.mutate(z.id);
-                          }
-                        }}
-                        className="text-muted-foreground hover:text-red-500 transition"
-                        title="Remover"
-                      >
-                        <Trash2 className="h-4 w-4 inline" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 gap-3">
+          {loadingZonas ? (
+            <p className="py-4 text-center text-muted-foreground">Carregando...</p>
+          ) : zonas.length === 0 ? (
+            <p className="py-4 text-center text-muted-foreground">Nenhuma zona de entrega cadastrada.</p>
+          ) : (
+            zonas.map((z: any) => (
+              <div key={z.id} className="flex flex-col gap-3 rounded-2xl border border-pink-50 bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-base text-foreground/80">{z.bairro}</span>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => updateZonaMutation.mutate({ id: z.id, ativo: !z.ativo })}
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${z.ativo ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                    >
+                      {z.ativo ? "Ativo" : "Inativo"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Remover taxa do bairro ${z.bairro}?`)) {
+                          deleteZonaMutation.mutate(z.id);
+                        }
+                      }}
+                      className="grid h-6 w-6 place-items-center rounded-full bg-red-50 text-red-400 hover:text-red-500 transition"
+                      title="Remover"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between border-t border-pink-50 pt-2">
+                  <span className="text-xs font-semibold text-muted-foreground">Taxa:</span>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => updateZonaMutation.mutate({ id: z.id, taxa: Math.max(0, z.taxa - 1) })}
+                      className="grid h-6 w-6 place-items-center rounded-full bg-pink-100 text-pink-600 hover:bg-pink-200 transition"
+                      title="Diminuir R$ 1,00"
+                    >
+                      <Minus className="h-3 w-3" />
+                    </button>
+                    <span className="w-16 text-center font-medium text-sm">{formatBRL(z.taxa)}</span>
+                    <button 
+                      onClick={() => updateZonaMutation.mutate({ id: z.id, taxa: z.taxa + 1 })}
+                      className="grid h-6 w-6 place-items-center rounded-full bg-pink-100 text-pink-600 hover:bg-pink-200 transition"
+                      title="Aumentar R$ 1,00"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
-      </div>
     </>
   );
 }
