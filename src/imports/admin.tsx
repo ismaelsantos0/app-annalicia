@@ -33,7 +33,46 @@ import { fetchProdutos, fetchClientes, fetchPedidosAdmin, updateOrderStatus, log
 import { formatBRL } from "../lib/products";
 import { formatWhatsApp } from "../lib/whatsapp";
 
-
+const getCroppedImg = async (imageSrc: string, pixelCrop: any) => {
+  const image = new Image();
+  image.src = imageSrc;
+  await new Promise((resolve) => (image.onload = resolve));
+  
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d")!;
+  
+  const MAX_SIZE = 1200;
+  let width = pixelCrop.width;
+  let height = pixelCrop.height;
+  
+  if (width > height) {
+    if (width > MAX_SIZE) {
+      height *= MAX_SIZE / width;
+      width = MAX_SIZE;
+    }
+  } else {
+    if (height > MAX_SIZE) {
+      width *= MAX_SIZE / height;
+      height = MAX_SIZE;
+    }
+  }
+  
+  canvas.width = width;
+  canvas.height = height;
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    width,
+    height
+  );
+  
+  return canvas.toDataURL("image/webp", 0.85);
+};
 
 type Tab = "dashboard" | "catalogo" | "pedidos" | "marketing" | "destaques" | "configuracoes";
 
@@ -321,46 +360,6 @@ function ProductsPanel({ token }: { token: string }) {
     onError: (e) => alert(e.message)
   });
 
-  const getCroppedImg = async (imageSrc: string, pixelCrop: any) => {
-    const image = new Image();
-    image.src = imageSrc;
-    await new Promise((resolve) => (image.onload = resolve));
-    
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d")!;
-    
-    const MAX_SIZE = 1200;
-    let width = pixelCrop.width;
-    let height = pixelCrop.height;
-    
-    if (width > height) {
-      if (width > MAX_SIZE) {
-        height *= MAX_SIZE / width;
-        width = MAX_SIZE;
-      }
-    } else {
-      if (height > MAX_SIZE) {
-        width *= MAX_SIZE / height;
-        height = MAX_SIZE;
-      }
-    }
-    
-    canvas.width = width;
-    canvas.height = height;
-    ctx.drawImage(
-      image,
-      pixelCrop.x,
-      pixelCrop.y,
-      pixelCrop.width,
-      pixelCrop.height,
-      0,
-      0,
-      width,
-      height
-    );
-    
-    return canvas.toDataURL("image/webp", 0.85);
-  };
 
 
 
@@ -1609,6 +1608,12 @@ function BannersPanel({ token }: { token: string }) {
   const [button2Link, setButton2Link] = useState("");
   const [corDestaque, setCorDestaque] = useState("#ec4899"); // default pink
 
+  const [cropOpen, setCropOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+
   const openEdit = (banner: any) => {
     setEditId(banner.id);
     setBadgeText(banner.badge_text || "");
@@ -1769,7 +1774,9 @@ function BannersPanel({ token }: { token: string }) {
                         reader.readAsDataURL(file);
                         reader.onload = (event) => {
                           if (event.target?.result) {
-                            setImageUrl(event.target.result as string);
+                            setImageToCrop(event.target.result as string);
+                            setCropOpen(true);
+                            e.target.value = "";
                           }
                         };
                       }}
@@ -1813,6 +1820,44 @@ function BannersPanel({ token }: { token: string }) {
                 {saveMutation.isPending ? "Salvando..." : "Salvar Banner"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {cropOpen && imageToCrop && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+          <div className="flex h-full w-full max-w-lg flex-col rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl text-primary">Recortar Foto do Banner</h2>
+              <button type="button" onClick={() => setCropOpen(false)} className="rounded-full bg-pink-50 p-2 text-primary hover:bg-pink-100">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            
+            <div className="relative flex-1 rounded-xl bg-black/5 overflow-hidden">
+              <Cropper
+                image={imageToCrop}
+                crop={crop}
+                zoom={zoom}
+                aspect={4 / 5}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={(_, croppedPixels) => setCroppedAreaPixels(croppedPixels)}
+              />
+            </div>
+            
+            <button 
+              type="button"
+              onClick={async () => {
+                const cropped = await getCroppedImg(imageToCrop, croppedAreaPixels);
+                setImageUrl(cropped);
+                setCropOpen(false);
+                setImageToCrop(null);
+              }}
+              className="mt-6 w-full rounded-full bg-primary py-3.5 font-semibold text-white transition hover:opacity-90"
+            >
+              Confirmar Recorte
+            </button>
           </div>
         </div>
       )}
