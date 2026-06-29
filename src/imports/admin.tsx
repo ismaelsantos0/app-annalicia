@@ -23,7 +23,8 @@ import {
   MousePointerClick,
   MonitorSmartphone,
   PieChart,
-  LogOut
+  LogOut,
+  Bell
 } from "lucide-react";
 import Cropper from "react-easy-crop";
 import { fetchProdutos, fetchClientes, fetchPedidosAdmin, updateOrderStatus, loginAdmin, createProduto, deleteProduto, fetchCategorias, createCategoria, deleteCategoria, updateEstoqueProduto, fetchConfiguracoes, updateConfiguracoes, fetchWhatsAppStatus, fetchWhatsAppQRCode, logoutWhatsApp, importFromInstagram, fetchZonasEntrega, createZonaEntrega, updateZonaEntrega, deleteZonaEntrega, seedBoaVista, fetchBanners, createBanner, updateBanner, deleteBanner, fetchDashboardStats, enviarDisparo } from "../lib/api";
@@ -61,6 +62,24 @@ export default function AdminDashboard() {
     },
     onError: (error) => alert(error.message || "Erro ao fazer login")
   });
+
+  const { data: notificationsOrders = [] } = useQuery({
+    queryKey: ["pedidos", "notifications"],
+    queryFn: () => fetchPedidosAdmin(token!),
+    enabled: !!token,
+    refetchInterval: 60000,
+  });
+
+  const { data: notificationsProducts = [] } = useQuery({
+    queryKey: ["produtos", "notifications"],
+    queryFn: () => fetchProdutos(),
+    enabled: !!token,
+    refetchInterval: 60000,
+  });
+
+  const pendingOrders = notificationsOrders.filter((o: any) => o.status === 'pendente').length;
+  const criticalStock = notificationsProducts.filter((p: any) => p.estoque <= 3).length;
+  const totalNotifications = pendingOrders + criticalStock;
 
   if (!token) {
     return (
@@ -112,12 +131,28 @@ export default function AdminDashboard() {
           </span>
           <span className="font-display text-lg text-primary">Annalicia Admin</span>
         </div>
-        <button 
-          onClick={() => { localStorage.removeItem("admin_token"); setToken(null); }}
-          className="grid h-8 w-8 place-items-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100"
-        >
-          <LogOut className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            className="relative grid h-8 w-8 place-items-center rounded-full bg-pink-50 text-primary transition hover:bg-pink-100"
+            onClick={() => {
+              if (pendingOrders > 0) setTab("pedidos");
+              else if (criticalStock > 0) setTab("catalogo");
+            }}
+          >
+            <Bell className="h-4 w-4" />
+            {totalNotifications > 0 && (
+              <span className="absolute -right-1 -top-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
+                {totalNotifications > 99 ? '99+' : totalNotifications}
+              </span>
+            )}
+          </button>
+          <button 
+            onClick={() => { localStorage.removeItem("admin_token"); setToken(null); }}
+            className="grid h-8 w-8 place-items-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-100"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </header>
 
       {/* Main Content Area */}
