@@ -1943,12 +1943,14 @@ function DestaquesPanel({ token }: { token: string }) {
     onError: (e) => alert(e.message)
   });
 
-  const filteredProducts = produtos.filter((p: any) => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = Array.isArray(produtos) ? produtos.filter((p: any) => {
+    const nameStr = p.name ? p.name.toLowerCase() : "";
+    const catStr = p.category ? p.category.toLowerCase() : "";
+    const searchStr = searchTerm.toLowerCase();
+    return nameStr.includes(searchStr) || catStr.includes(searchStr);
+  }) : [];
   
-  const destaquesCount = produtos.filter((p: any) => p.destaque).length;
+  const destaquesCount = Array.isArray(produtos) ? produtos.filter((p: any) => p.destaque).length : 0;
 
   if (isLoadingConfig || isLoadingCat || isLoadingProd) return <LoadingSpinner />;
 
@@ -1976,7 +1978,7 @@ function DestaquesPanel({ token }: { token: string }) {
               <label className="mb-1 block text-sm font-semibold text-primary">Categoria em Destaque</label>
               <select value={categoriaDestaqueId} onChange={e => setCategoriaDestaqueId(e.target.value)} className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary bg-white">
                 <option value="">Nenhuma (apenas produtos ⭐ marcados)</option>
-                {categorias.map((c: any) => (
+                {Array.isArray(categorias) && categorias.map((c: any) => (
                   <option key={c.id} value={c.id}>{c.nome}</option>
                 ))}
               </select>
