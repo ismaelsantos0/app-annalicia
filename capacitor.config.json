@@ -1,0 +1,6 @@
+{
+  "appId": "com.annalicia.app",
+  "appName": "Annalícia",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
