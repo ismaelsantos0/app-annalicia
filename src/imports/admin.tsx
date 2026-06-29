@@ -1948,10 +1948,10 @@ function DestaquesPanel({ token }: { token: string }) {
   });
 
   const filteredProducts = Array.isArray(produtos) ? produtos.filter((p: any) => {
-    const nameStr = p.name ? p.name.toLowerCase() : "";
-    const catStr = p.category ? p.category.toLowerCase() : "";
+    const nome = p.nome || "";
+    const categoria = p.categoria?.nome || p.categoria || "";
     const searchStr = searchTerm.toLowerCase();
-    return nameStr.includes(searchStr) || catStr.includes(searchStr);
+    return nome.toLowerCase().includes(searchStr) || categoria.toLowerCase().includes(searchStr);
   }) : [];
   
   const destaquesCount = Array.isArray(produtos) ? produtos.filter((p: any) => p.destaque).length : 0;
@@ -2021,24 +2021,36 @@ function DestaquesPanel({ token }: { token: string }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-pink-50">
-              {filteredProducts.map((p: any) => (
+              {filteredProducts.map((p: any) => {
+                let imageUrl = "";
+                if (p.imagem_url) {
+                  try {
+                    const parsed = JSON.parse(p.imagem_url);
+                    imageUrl = parsed[0];
+                  } catch {
+                    imageUrl = p.imagem_url;
+                  }
+                }
+                const catName = p.categoria?.nome || p.categoria || "";
+                
+                return (
                 <tr key={p.id} className="transition-colors hover:bg-pink-50/30">
                   <td className="px-6 py-4">
                     <div className="h-10 w-10 overflow-hidden rounded-full border border-pink-100 bg-pink-50">
-                      {p.images && p.images[0] ? (
-                        <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" />
+                      {imageUrl ? (
+                        <img src={imageUrl} alt={p.nome} className="h-full w-full object-cover" />
                       ) : (
                         <ImageIcon className="h-5 w-5 m-2.5 text-pink-200" />
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-medium">{p.name}</td>
+                  <td className="px-6 py-4 font-medium">{p.nome}</td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center rounded-full bg-pink-50 px-2 py-1 text-xs font-semibold text-pink-600">
-                      {p.category}
+                      {catName}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-medium text-primary">{formatBRL(p.price)}</td>
+                  <td className="px-6 py-4 font-medium text-primary">{formatBRL(p.preco || 0)}</td>
                   <td className="px-6 py-4 text-center">
                     <button 
                       onClick={() => toggleDestaqueMutation.mutate({ id: p.id, destaque: !p.destaque })}
@@ -2049,7 +2061,7 @@ function DestaquesPanel({ token }: { token: string }) {
                     </button>
                   </td>
                 </tr>
-              ))}
+              )})}
               {filteredProducts.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
