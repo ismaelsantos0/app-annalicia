@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://web-production-f2fae.up.railway.app";
 
 const request = async (endpoint: string, options: RequestInit = {}) => {
   const res = await fetch(`${BASE_URL}${endpoint}`, {
