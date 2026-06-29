@@ -248,14 +248,14 @@ export default function AdminDashboard() {
       )}
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-pink-100 bg-white px-2 py-2 pb-safe shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center gap-1 overflow-x-auto border-t border-pink-100 bg-white px-4 py-2 pb-safe shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {navItems.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
           return (
             <button
               key={id}
               onClick={() => setTab(id)}
-              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-1 transition-all ${
+              className={`flex-shrink-0 flex flex-col items-center justify-center gap-1 rounded-xl min-w-[72px] px-2 py-1 transition-all ${
                 active ? "text-primary" : "text-muted-foreground hover:text-primary/70"
               }`}
             >
@@ -1030,21 +1030,23 @@ function ConfiguracoesPanel({ token }: { token: string }) {
     queryFn: () => fetchConfiguracoes(token),
   });
 
-  if (config && !isLoading && !queryClient.isMutating()) {
-    if (config.estoque_critico.toString() !== critico) setCritico(config.estoque_critico.toString());
-    if (config.estoque_atencao.toString() !== atencao) setAtencao(config.estoque_atencao.toString());
-    if (config.whatsapp_loja && config.whatsapp_loja !== whatsappLoja) setWhatsappLoja(config.whatsapp_loja);
-    if (config.link_instagram && config.link_instagram !== linkInstagram) setLinkInstagram(config.link_instagram);
-    if (config.link_tiktok && config.link_tiktok !== linkTiktok) setLinkTiktok(config.link_tiktok);
-    if (config.popup_ativo !== popupAtivo) setPopupAtivo(config.popup_ativo);
-    if (config.popup_titulo && config.popup_titulo !== popupTitulo) setPopupTitulo(config.popup_titulo);
-    if (config.popup_texto && config.popup_texto !== popupTexto) setPopupTexto(config.popup_texto);
-    if (config.popup_imagem && config.popup_imagem !== popupImagem) setPopupImagem(config.popup_imagem);
-    if (config.popup_botao_texto && config.popup_botao_texto !== popupBotaoTexto) setPopupBotaoTexto(config.popup_botao_texto);
-    if (config.popup_botao_link && config.popup_botao_link !== popupBotaoLink) setPopupBotaoLink(config.popup_botao_link);
-    if (config.texto_frete && config.texto_frete !== textoFrete) setTextoFrete(config.texto_frete);
-    if (config.texto_brinde && config.texto_brinde !== textoBrinde) setTextoBrinde(config.texto_brinde);
-  }
+  useEffect(() => {
+    if (config && !isLoading) {
+      if (config.estoque_critico !== undefined) setCritico(config.estoque_critico.toString());
+      if (config.estoque_atencao !== undefined) setAtencao(config.estoque_atencao.toString());
+      if (config.whatsapp_loja !== undefined) setWhatsappLoja(config.whatsapp_loja);
+      if (config.link_instagram !== undefined) setLinkInstagram(config.link_instagram);
+      if (config.link_tiktok !== undefined) setLinkTiktok(config.link_tiktok);
+      if (config.popup_ativo !== undefined) setPopupAtivo(config.popup_ativo);
+      if (config.popup_titulo !== undefined) setPopupTitulo(config.popup_titulo);
+      if (config.popup_texto !== undefined) setPopupTexto(config.popup_texto);
+      if (config.popup_imagem !== undefined) setPopupImagem(config.popup_imagem);
+      if (config.popup_botao_texto !== undefined) setPopupBotaoTexto(config.popup_botao_texto);
+      if (config.popup_botao_link !== undefined) setPopupBotaoLink(config.popup_botao_link);
+      if (config.texto_frete !== undefined) setTextoFrete(config.texto_frete);
+      if (config.texto_brinde !== undefined) setTextoBrinde(config.texto_brinde);
+    }
+  }, [config, isLoading]);
 
   const mutation = useMutation({
     mutationFn: () => updateConfiguracoes(token, {
