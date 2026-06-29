@@ -75,7 +75,7 @@ export const deleteCategoria = (token: string, id: string) => request(`/categori
   headers: { Authorization: `Bearer ${token}` }
 });
 export const updateEstoqueProduto = (token: string, id: string, estoque: number) => request(`/produtos/${id}/estoque`, {
-  method: "PUT",
+  method: "PATCH",
   headers: { Authorization: `Bearer ${token}` },
   body: JSON.stringify({ estoque })
 });
