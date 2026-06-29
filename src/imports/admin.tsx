@@ -53,6 +53,7 @@ export default function AdminDashboard() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const loginMutation = useMutation({
     mutationFn: () => loginAdmin(username, password),
@@ -134,10 +135,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-3">
           <button 
             className="relative grid h-8 w-8 place-items-center rounded-full bg-pink-50 text-primary transition hover:bg-pink-100"
-            onClick={() => {
-              if (pendingOrders > 0) setTab("pedidos");
-              else if (criticalStock > 0) setTab("catalogo");
-            }}
+            onClick={() => setNotificationsOpen(!notificationsOpen)}
           >
             <Bell className="h-4 w-4" />
             {totalNotifications > 0 && (
@@ -169,6 +167,60 @@ export default function AdminDashboard() {
           <CatalogoTabs token={token} />
         )}
       </main>
+
+      {/* Notifications Dropdown / Modal */}
+      {notificationsOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" 
+            onClick={() => setNotificationsOpen(false)} 
+          />
+          <div className="absolute right-4 top-16 z-50 w-80 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/5 animate-in slide-in-from-top-2 fade-in">
+            <div className="flex items-center justify-between border-b border-pink-50 bg-pink-50/50 px-4 py-3">
+              <h3 className="font-display text-sm text-primary">Notificações</h3>
+              <button onClick={() => setNotificationsOpen(false)} className="text-muted-foreground hover:text-primary">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto p-2">
+              {totalNotifications === 0 ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">Nenhuma nova notificação.</div>
+              ) : (
+                <div className="space-y-1">
+                  {pendingOrders > 0 && (
+                    <button 
+                      onClick={() => { setTab("pedidos"); setNotificationsOpen(false); }}
+                      className="flex w-full items-start gap-3 rounded-xl p-3 text-left transition hover:bg-pink-50/80"
+                    >
+                      <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-yellow-100 text-yellow-600">
+                        <Receipt className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Novos Pedidos</p>
+                        <p className="text-xs text-muted-foreground">Você tem {pendingOrders} pedido(s) pendente(s) aguardando aprovação.</p>
+                      </div>
+                    </button>
+                  )}
+                  {criticalStock > 0 && (
+                    <button 
+                      onClick={() => { setTab("catalogo"); setNotificationsOpen(false); }}
+                      className="flex w-full items-start gap-3 rounded-xl p-3 text-left transition hover:bg-pink-50/80"
+                    >
+                      <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-red-100 text-red-600">
+                        <Boxes className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Estoque Crítico</p>
+                        <p className="text-xs text-muted-foreground">{criticalStock} produto(s) atingiram o nível crítico de estoque (≤ 3 un).</p>
+                      </div>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-pink-100 bg-white px-2 py-2 pb-safe shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
