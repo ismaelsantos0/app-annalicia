@@ -212,11 +212,11 @@ function AdminLayout({ token, onLogout }: { token: string; onLogout: () => void 
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={\`flex flex-shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all \${
+              className={`flex flex-shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
                 tab === t.id
                   ? "bg-slate-900 text-white shadow-md"
                   : "text-slate-600 hover:bg-slate-100"
-              }\`}
+              }`}
             >
               {t.icon}
               {t.label}
