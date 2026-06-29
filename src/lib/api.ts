@@ -72,6 +72,11 @@ export const deleteProduto = (token: string, id: string) => request(`/produtos/$
   method: "DELETE",
   headers: { Authorization: `Bearer ${token}` }
 });
+export const updateProdutoDestaque = (token: string, id: string, destaque: boolean) => request(`/produtos/${id}/destaque`, {
+  method: "PATCH",
+  headers: { Authorization: `Bearer ${token}` },
+  body: JSON.stringify({ destaque })
+});
 export const createCategoria = (token: string, nome: string) => request("/categorias", {
   method: "POST",
   headers: { Authorization: `Bearer ${token}` },

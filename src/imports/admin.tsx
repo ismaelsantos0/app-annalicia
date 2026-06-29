@@ -25,22 +25,24 @@ import {
   PieChart,
   LogOut,
   Bell,
-  Flower2
+  Flower2,
+  Star
 } from "lucide-react";
 import Cropper from "react-easy-crop";
-import { fetchProdutos, fetchClientes, fetchPedidosAdmin, updateOrderStatus, loginAdmin, createProduto, deleteProduto, fetchCategorias, createCategoria, deleteCategoria, updateEstoqueProduto, fetchConfiguracoes, updateConfiguracoes, fetchWhatsAppStatus, fetchWhatsAppQRCode, logoutWhatsApp, importFromInstagram, fetchZonasEntrega, createZonaEntrega, updateZonaEntrega, deleteZonaEntrega, seedBoaVista, fetchBanners, createBanner, updateBanner, deleteBanner, fetchDashboardStats, enviarDisparo } from "../lib/api";
+import { fetchProdutos, fetchClientes, fetchPedidosAdmin, updateOrderStatus, loginAdmin, createProduto, deleteProduto, fetchCategorias, createCategoria, deleteCategoria, updateEstoqueProduto, fetchConfiguracoes, updateConfiguracoes, fetchWhatsAppStatus, fetchWhatsAppQRCode, logoutWhatsApp, importFromInstagram, fetchZonasEntrega, createZonaEntrega, updateZonaEntrega, deleteZonaEntrega, seedBoaVista, fetchBanners, createBanner, updateBanner, deleteBanner, fetchDashboardStats, enviarDisparo, updateProdutoDestaque } from "../lib/api";
 import { formatBRL } from "../lib/products";
 import { formatWhatsApp } from "../lib/whatsapp";
 
 
 
-type Tab = "dashboard" | "catalogo" | "pedidos" | "marketing" | "configuracoes";
+type Tab = "dashboard" | "catalogo" | "pedidos" | "marketing" | "destaques" | "configuracoes";
 
 const navItems = [
   { id: "dashboard" as Tab, label: "Dashboard", icon: PieChart },
   { id: "catalogo" as Tab, label: "Catálogo", icon: Shirt },
   { id: "pedidos" as Tab, label: "Pedidos", icon: Receipt },
   { id: "marketing" as Tab, label: "Marketing", icon: Megaphone },
+  { id: "destaques" as Tab, label: "Destaques", icon: Star },
   { id: "configuracoes" as Tab, label: "Configurações", icon: Settings },
 ];
 
@@ -182,6 +184,8 @@ export default function AdminDashboard() {
           <OrdersPanel token={token} />
         ) : tab === "marketing" ? (
           <MarketingTabs token={token} />
+        ) : tab === "destaques" ? (
+          <DestaquesPanel token={token} />
         ) : tab === "configuracoes" ? (
           <ConfiguracoesTabs token={token} />
         ) : (
@@ -1889,6 +1893,168 @@ function ConfiguracoesTabs({ token }: { token: string }) {
       {subTab === "geral" && <ConfiguracoesPanel token={token} />}
       {subTab === "pagamentos" && <PagamentosPanel token={token} />}
       {subTab === "whatsapp" && <WhatsAppPanel token={token} />}
+    </>
+  );
+}
+
+function DestaquesPanel({ token }: { token: string }) {
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [titulo, setTitulo] = useState("Destaques da Semana");
+  const [categoriaDestaqueId, setCategoriaDestaqueId] = useState("");
+
+  const { data: config, isLoading: isLoadingConfig } = useQuery({
+    queryKey: ["configuracoes"],
+    queryFn: () => fetchConfiguracoes(token),
+  });
+
+  const { data: categorias = [], isLoading: isLoadingCat } = useQuery({
+    queryKey: ["categorias"],
+    queryFn: fetchCategorias,
+  });
+
+  const { data: produtos = [], isLoading: isLoadingProd } = useQuery({
+    queryKey: ["produtos"],
+    queryFn: fetchProdutos,
+  });
+
+  if (config && !isLoadingConfig && !queryClient.isMutating()) {
+    if (config.titulo_destaques && config.titulo_destaques !== titulo) setTitulo(config.titulo_destaques);
+    if (config.categoria_destaque_id !== undefined && config.categoria_destaque_id !== categoriaDestaqueId) setCategoriaDestaqueId(config.categoria_destaque_id || "");
+  }
+
+  const saveConfigMutation = useMutation({
+    mutationFn: () => updateConfiguracoes(token, {
+      titulo_destaques: titulo,
+      categoria_destaque_id: categoriaDestaqueId || null
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["configuracoes"] });
+      alert("Configurações de destaques salvas com sucesso!");
+    },
+    onError: (e) => alert(e.message)
+  });
+
+  const toggleDestaqueMutation = useMutation({
+    mutationFn: ({ id, destaque }: { id: string, destaque: boolean }) => updateProdutoDestaque(token, id, destaque),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["produtos"] });
+    },
+    onError: (e) => alert(e.message)
+  });
+
+  const filteredProducts = produtos.filter((p: any) => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    p.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const destaquesCount = produtos.filter((p: any) => p.destaque).length;
+
+  if (isLoadingConfig || isLoadingCat || isLoadingProd) return <LoadingSpinner />;
+
+  return (
+    <>
+      <div className="mb-8">
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">Vitrine</p>
+        <h1 className="mt-1 font-display text-3xl sm:text-4xl">Seção de Destaques</h1>
+      </div>
+
+      <div className="mb-8 rounded-3xl bg-white p-6 shadow-[0_15px_40px_-25px_rgba(236,72,153,0.3)]">
+        <h2 className="mb-6 font-display text-xl flex items-center gap-2"><Star className="h-5 w-5 text-yellow-400 fill-yellow-400" /> Configurar Seção</h2>
+        
+        <form onSubmit={(e) => { e.preventDefault(); saveConfigMutation.mutate(); }}>
+          <div className="grid gap-6 md:grid-cols-2 mb-6">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-primary">Título da Seção</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-yellow-400"><Sparkles className="h-4 w-4" /></div>
+                <input type="text" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Destaques da Semana" className="w-full rounded-xl border border-pink-100 py-3 pl-10 pr-3 outline-none focus:border-primary" />
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">Aparece como título no site. Pode usar emojis!</p>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-primary">Categoria em Destaque</label>
+              <select value={categoriaDestaqueId} onChange={e => setCategoriaDestaqueId(e.target.value)} className="w-full rounded-xl border border-pink-100 p-3 outline-none focus:border-primary bg-white">
+                <option value="">Nenhuma (apenas produtos ⭐ marcados)</option>
+                {categorias.map((c: any) => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-muted-foreground">Todos os produtos desta categoria entram nos destaques automaticamente.</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between border-t border-pink-50 pt-6">
+            <p className="text-sm font-medium text-pink-600">
+              <span className="font-bold">{destaquesCount}</span> produtos com ⭐ marcados individualmente
+            </p>
+            <button type="submit" disabled={saveConfigMutation.isPending} className="rounded-full bg-primary px-6 py-2.5 font-semibold text-white transition hover:bg-pink-600 disabled:opacity-50">
+              {saveConfigMutation.isPending ? "Salvando..." : "Salvar Configurações"}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="rounded-3xl bg-white shadow-[0_15px_40px_-25px_rgba(236,72,153,0.3)] overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b border-pink-50">
+          <h3 className="font-display text-lg font-semibold">Marcar Produtos</h3>
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input type="text" placeholder="Buscar produto..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full rounded-full border border-pink-100 py-2 pl-9 pr-4 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-pink-50/50 text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="px-6 py-4 font-semibold">Foto</th>
+                <th className="px-6 py-4 font-semibold">Nome</th>
+                <th className="px-6 py-4 font-semibold">Categoria</th>
+                <th className="px-6 py-4 font-semibold">Preço</th>
+                <th className="px-6 py-4 font-semibold text-center">Destaque ⭐</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-pink-50">
+              {filteredProducts.map((p: any) => (
+                <tr key={p.id} className="transition-colors hover:bg-pink-50/30">
+                  <td className="px-6 py-4">
+                    <div className="h-10 w-10 overflow-hidden rounded-full border border-pink-100 bg-pink-50">
+                      {p.images && p.images[0] ? (
+                        <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <ImageIcon className="h-5 w-5 m-2.5 text-pink-200" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 font-medium">{p.name}</td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center rounded-full bg-pink-50 px-2 py-1 text-xs font-semibold text-pink-600">
+                      {p.category}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 font-medium text-primary">{formatBRL(p.price)}</td>
+                  <td className="px-6 py-4 text-center">
+                    <button 
+                      onClick={() => toggleDestaqueMutation.mutate({ id: p.id, destaque: !p.destaque })}
+                      disabled={toggleDestaqueMutation.isPending}
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${p.destaque ? 'bg-yellow-100 text-yellow-500 hover:bg-yellow-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'} disabled:opacity-50`}
+                    >
+                      <Star className={`h-4 w-4 ${p.destaque ? 'fill-yellow-500' : ''}`} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filteredProducts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                    Nenhum produto encontrado.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </>
   );
 }
