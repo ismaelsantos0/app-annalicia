@@ -44,7 +44,7 @@ export const fetchZonasEntrega = () => request("/zonas-entrega");
 
 export const fetchClientes = (token: string) => request("/clientes", { headers: { Authorization: `Bearer ${token}` } });
 export const fetchPedidosAdmin = (token: string) => request("/pedidos", { headers: { Authorization: `Bearer ${token}` } });
-export const fetchDashboardStats = (token: string) => request("/stats", { headers: { Authorization: `Bearer ${token}` } });
+export const fetchDashboardStats = (token: string) => request("/pedidos/dashboard/stats", { headers: { Authorization: `Bearer ${token}` } });
 
 export const updateOrderStatus = (token: string, id: string, status: string) => request(`/pedidos/${id}/status`, {
   method: "PATCH",
