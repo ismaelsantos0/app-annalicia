@@ -46,12 +46,20 @@ const navItems = [
 
 function LoadingSpinner({ message = "Carregando..." }: { message?: string }) {
   return (
-    <div className="flex w-full flex-col items-center justify-center py-16 opacity-80 transition-opacity">
-      <div className="relative grid h-16 w-16 place-items-center">
-        <Flower2 className="absolute h-10 w-10 animate-[spin_4s_linear_infinite] text-pink-300" />
-        <Flower2 className="absolute h-6 w-6 animate-[spin_3s_linear_infinite_reverse] text-primary drop-shadow-sm" />
+    <div className="flex w-full flex-col items-center justify-center py-20 opacity-90 transition-opacity">
+      <div className="relative flex h-20 w-20 items-center justify-center">
+        {/* Outer glowing pulse */}
+        <div className="absolute inset-0 animate-ping rounded-full bg-pink-200/40"></div>
+        
+        {/* Inner rotating gradient ring */}
+        <div className="absolute inset-2 animate-spin rounded-full border-4 border-transparent border-t-pink-400 border-r-pink-300"></div>
+        
+        {/* Core sparkle */}
+        <div className="absolute flex h-10 w-10 animate-pulse items-center justify-center rounded-full bg-gradient-to-tr from-pink-400 to-pink-200 shadow-lg shadow-pink-200">
+          <Sparkles className="h-5 w-5 text-white" />
+        </div>
       </div>
-      <p className="mt-2 animate-pulse font-display text-sm uppercase tracking-widest text-primary/60">{message}</p>
+      <p className="mt-8 animate-pulse font-display text-xs font-semibold uppercase tracking-[0.2em] text-primary/70">{message}</p>
     </div>
   );
 }
