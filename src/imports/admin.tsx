@@ -1458,6 +1458,7 @@ function PagamentosPanel({ token }: { token: string }) {
             ))
           )}
         </div>
+      </div>
     </>
   );
 }
