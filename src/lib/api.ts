@@ -45,7 +45,7 @@ export const fetchPedidosAdmin = (token: string) => request("/pedidos", { header
 export const fetchDashboardStats = (token: string) => request("/stats", { headers: { Authorization: `Bearer ${token}` } });
 
 export const updateOrderStatus = (token: string, id: string, status: string) => request(`/pedidos/${id}/status`, {
-  method: "PUT",
+  method: "PATCH",
   headers: { Authorization: `Bearer ${token}` },
   body: JSON.stringify({ status })
 });
@@ -81,7 +81,7 @@ export const updateEstoqueProduto = (token: string, id: string, estoque: number)
 });
 
 export const updateConfiguracoes = (token: string, data: any) => request("/configuracoes", {
-  method: "PUT",
+  method: "PATCH",
   headers: { Authorization: `Bearer ${token}` },
   body: JSON.stringify(data)
 });
@@ -92,7 +92,7 @@ export const createZonaEntrega = (token: string, data: any) => request("/zonas-e
   body: JSON.stringify(data)
 });
 export const updateZonaEntrega = (token: string, id: string, data: any) => request(`/zonas-entrega/${id}`, {
-  method: "PUT",
+  method: "PATCH",
   headers: { Authorization: `Bearer ${token}` },
   body: JSON.stringify(data)
 });
@@ -107,7 +107,7 @@ export const createBanner = (token: string, data: any) => request("/banners", {
   body: JSON.stringify(data)
 });
 export const updateBanner = (token: string, id: string, data: any) => request(`/banners/${id}`, {
-  method: "PUT",
+  method: "PATCH",
   headers: { Authorization: `Bearer ${token}` },
   body: JSON.stringify(data)
 });
