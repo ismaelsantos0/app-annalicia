@@ -293,22 +293,22 @@ function ProductsPanel({ token }: { token: string }) {
           <p className="p-6 text-center text-muted-foreground">Carregando...</p>
         ) : products.map((p: any) => (
           <div key={p.id} className="flex overflow-hidden rounded-2xl bg-white p-3 shadow-sm border border-pink-50 relative">
-            <img src={p.images?.[0] || ""} alt={p.name} className="h-24 w-20 flex-shrink-0 rounded-xl object-cover bg-pink-50" />
+            <img src={p.imagens?.[0] || ""} alt={p.nome} className="h-24 w-20 flex-shrink-0 rounded-xl object-cover bg-pink-50" />
             <div className="ml-4 flex flex-1 flex-col justify-center">
               <span className="mb-1 inline-flex w-fit items-center rounded-full bg-pink-100/50 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                {p.category}
+                {p.categoria || ""}
               </span>
-              <h3 className="font-display text-base leading-tight">{p.name}</h3>
+              <h3 className="font-display text-base leading-tight">{p.nome}</h3>
               <div className="mt-2 flex items-end justify-between">
-                <span className="font-semibold text-primary">{formatBRL(p.price)}</span>
-                <span className={`text-xs font-semibold ${p.stock < 10 ? "text-red-500" : "text-emerald-600"}`}>
-                  {p.stock} un.
+                <span className="font-semibold text-primary">{formatBRL(p.preco || 0)}</span>
+                <span className={`text-xs font-semibold ${p.estoque < 10 ? "text-red-500" : "text-emerald-600"}`}>
+                  {p.estoque} un.
                 </span>
               </div>
             </div>
             <button
               onClick={() => {
-                if (confirm(`Deletar o produto ${p.name}?`)) {
+                if (confirm(`Deletar o produto ${p.nome}?`)) {
                   deleteProdMutation.mutate(p.id);
                 }
               }}
@@ -818,10 +818,10 @@ function EstoquePanel({ token }: { token: string }) {
           let badgeClass = "bg-mint text-emerald-700";
           let statusText = "Seguro";
           
-          if (p.stock <= critico) {
+          if (p.estoque <= critico) {
             badgeClass = "bg-red-100 text-red-700";
             statusText = "Crítico";
-          } else if (p.stock <= atencao) {
+          } else if (p.estoque <= atencao) {
             badgeClass = "bg-yellow-100 text-yellow-700";
             statusText = "Atenção";
           }
@@ -829,12 +829,12 @@ function EstoquePanel({ token }: { token: string }) {
           return (
             <div key={p.id} className="flex flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-sm border border-pink-50">
               <div className="flex items-center gap-3">
-                <img src={p.images?.[0] || ""} alt={p.name} className="h-14 w-12 rounded-xl object-cover bg-pink-50 flex-shrink-0" />
+                <img src={p.imagens?.[0] || ""} alt={p.nome} className="h-14 w-12 rounded-xl object-cover bg-pink-50 flex-shrink-0" />
                 <div className="flex-1">
-                  <h3 className="font-display text-sm leading-tight">{p.name}</h3>
+                  <h3 className="font-display text-sm leading-tight">{p.nome}</h3>
                   <div className="mt-1 flex items-center gap-2">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClass}`}>
-                      {p.stock} un.
+                      {p.estoque} un.
                     </span>
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${badgeClass.replace('bg-', 'text-').replace('text-', '')}`}>
                       {statusText}
@@ -846,22 +846,22 @@ function EstoquePanel({ token }: { token: string }) {
                 <span className="text-xs font-semibold text-muted-foreground">Ajuste Rápido:</span>
                 <div className="flex items-center justify-center gap-2">
                   <button 
-                    onClick={() => handleUpdate(p.id, p.stock, -1)}
-                    disabled={mutation.isPending || p.stock === 0}
+                    onClick={() => handleUpdate(p.id, p.estoque, -1)}
+                    disabled={mutation.isPending || p.estoque === 0}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-50 text-primary transition hover:bg-pink-100 disabled:opacity-50"
                   >
                     -1
                   </button>
                   <input
                     type="number"
-                    defaultValue={p.stock}
-                    key={p.stock}
+                    defaultValue={p.estoque}
+                    key={p.estoque}
                     onBlur={(e) => handleDirectUpdate(p.id, e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleDirectUpdate(p.id, (e.target as HTMLInputElement).value)}
                     className="w-14 rounded-xl border border-pink-100 bg-transparent p-1 text-center text-sm outline-none focus:border-primary"
                   />
                   <button 
-                    onClick={() => handleUpdate(p.id, p.stock, 1)}
+                    onClick={() => handleUpdate(p.id, p.estoque, 1)}
                     disabled={mutation.isPending}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-50 text-primary transition hover:bg-pink-100 disabled:opacity-50"
                   >
