@@ -55,6 +55,20 @@ function Storefront() {
       ? products.filter(p => p.isNew)
       : products.filter(p => p.category === activeCategory);
 
+  // Agrupar produtos com o mesmo nome para mostrar variações de cor
+  const groupedProducts = Object.values(
+    filteredProducts.reduce((acc: any, product) => {
+      const name = product.name?.trim() || "";
+      if (!acc[name]) {
+        acc[name] = { ...product, variants: [product] };
+      } else {
+        acc[name].variants.push(product);
+      }
+      return acc;
+    }, {})
+  ) as any[];
+
+
   const { data: banners = [] } = useQuery({
     queryKey: ["banners"],
     queryFn: fetchBanners,
@@ -251,16 +265,16 @@ function Storefront() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading ? (
             <p className="text-muted-foreground">Carregando looks...</p>
-          ) : filteredProducts.length === 0 ? (
+          ) : groupedProducts.length === 0 ? (
             <p className="text-muted-foreground">Nenhum look nessa categoria ainda.</p>
           ) : (
-            filteredProducts.slice(0, 3).map((p) => (
+            groupedProducts.slice(0, 3).map((p) => (
               <ProductCard key={p.id} product={p} />
             ))
           )}
         </div>
 
-        {filteredProducts.length > 3 && (
+        {groupedProducts.length > 3 && (
           <div className="mt-20 mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
               Tem mais
@@ -270,9 +284,9 @@ function Storefront() {
             </h2>
           </div>
         )}
-        {filteredProducts.length > 3 && (
+        {groupedProducts.length > 3 && (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredProducts.slice(3).map((p) => (
+            {groupedProducts.slice(3).map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
